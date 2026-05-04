@@ -178,7 +178,7 @@ Then open **http://localhost:3000** (or your server’s public IP + port behind 
 ## Branding
 
 - In-app logo: React component **`frontend/src/components/BrandLogo.tsx`**
-- Favicon: **`frontend/src/app/icon.svg`**
+- Favicon: **`frontend/public/icon.svg`** (linked from root layout metadata)
 - Raster mark (README, marketing): **`frontend/public/cgpa-brand-mark.png`**
 
 ---

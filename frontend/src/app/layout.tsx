@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "CGPA Tracker Pro",
   description:
     "Plan semesters, log courses and grades, and watch GPA and CGPA stay in sync—built for four-, five-, and six-year degrees.",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
