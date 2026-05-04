@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const nav = [
@@ -43,9 +44,12 @@ export default function HomePage() {
     <div id="top" className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
       <header className="sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--card)]/95 text-[var(--fg)] backdrop-blur-md dark:border-white/5 dark:bg-[#0c0b14]/95 dark:text-slate-100">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 md:px-6">
-          <Link href="#top" className="flex items-center gap-2 font-semibold tracking-tight">
-            <span className="text-lg">CGPA Tracker</span>
-            <span className="rounded-md bg-brand-600 px-2 py-0.5 text-xs font-bold uppercase text-white">Pro</span>
+          <Link href="#top" className="flex items-center gap-3 font-semibold tracking-tight">
+            <BrandLogo className="h-9 w-9 shrink-0" />
+            <span className="flex flex-wrap items-center gap-2">
+              <span className="text-lg text-[var(--fg)]">CGPA Tracker</span>
+              <span className="rounded-md bg-brand-600 px-2 py-0.5 text-xs font-bold uppercase text-white">Pro</span>
+            </span>
           </Link>
           <nav className="hidden flex-wrap items-center justify-center gap-6 text-sm text-[var(--muted)] dark:text-slate-300 lg:flex">
             {nav.map((n) => (

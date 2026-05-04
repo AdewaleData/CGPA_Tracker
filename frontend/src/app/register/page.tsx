@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 import { api, setToken } from "@/lib/api";
@@ -43,10 +44,14 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] px-4 py-10 text-[var(--fg)]">
-      <div className="mx-auto flex max-w-md justify-end">
+      <div className="mx-auto flex max-w-md items-center justify-between gap-4">
+        <Link href="/" className="flex items-center gap-2 rounded-lg py-1 pr-2 text-[var(--fg)] hover:opacity-90" aria-label="CGPA Tracker Pro home">
+          <BrandLogo className="h-10 w-10 shrink-0" />
+          <span className="hidden text-sm font-bold tracking-tight sm:inline">CGPA Tracker Pro</span>
+        </Link>
         <ThemeToggle />
       </div>
-      <div className="mx-auto mt-8 max-w-md rounded-2xl border border-[var(--border)] bg-[var(--card)] p-8 shadow-sm">
+      <div className="mx-auto mt-6 max-w-md rounded-2xl border border-[var(--border)] bg-[var(--card)] p-8 shadow-sm">
         <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
         <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
           Tell us your name, email, and how long your degree runs. We create the semester list for you so you can start

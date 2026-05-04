@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
+import { BrandLogo } from "@/components/BrandLogo";
 import {
   IconCalendar,
   IconCourses,
   IconDashboard,
-  IconCap,
   IconReports,
   IconSemesters,
   IconSettings,
@@ -58,9 +58,7 @@ export function Sidebar({ mobileOpen, onNavigate }: SidebarProps) {
         }`}
       >
         <div className="flex items-center gap-3 border-b border-white/5 px-5 py-5">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-white">
-            <IconCap className="h-5 w-5 text-white" />
-          </span>
+          <BrandLogo className="h-10 w-10 shrink-0 rounded-xl shadow-sm shadow-black/20" />
           <div>
             <p className="text-sm font-bold tracking-tight text-white">CGPA Tracker Pro</p>
             <p className="text-xs text-slate-400">Your courses and CGPA in one place</p>
