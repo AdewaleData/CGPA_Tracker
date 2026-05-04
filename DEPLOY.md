@@ -53,10 +53,20 @@ docker compose -f docker-compose.deploy.yml up --build
 ### Backend (Render, Railway, Fly, etc.)
 
 1. Create a **PostgreSQL** instance and note the connection string.
-2. Deploy the **backend**:
-   - **Railway (monorepo):** connect this repo with **Root Directory** empty (repo root). **`Dockerfile`** at the repo root builds the API; **`railway.json`** sets **`builder: DOCKERFILE`** so Railpack does not try to guess the stack. (Railway was skipping `backend/Dockerfile` because child paths are not used when the service root is the repo root.) Set **`DATABASE_URL`**, **`JWT_SECRET`**, **`CORS_ORIGINS`** on the service.
-   - **Alternatively on Railway:** set **Root Directory** to **`backend`** and use Railpack/Nixpacks Python autodetect, or set **Dockerfile path** to `backend/Dockerfile` if your UI allows it.
-   - **Render / Fly:** point the service at **`Dockerfile`** in the repo root with build context **`.`**, or set root to `backend` and use `backend/Dockerfile`.
+2. Deploy the **backend** (monorepo):
+
+#### Railway — “skipping `backend/Dockerfile`” / “Railpack could not determine how to build”
+
+With **Root Directory empty**, Railway only treats **`Dockerfile`** at the **repo root** as the Docker entrypoint; paths like **`backend/Dockerfile`** are **skipped** (`acceptChildOfRepoRoot: false`). If your build log **does not list** `Dockerfile` or `railway.json` at the top level, you are on an **old commit** — pull **`main`** from GitHub and redeploy.
+
+**Option A (recommended):** In the **API** service → **Settings** → **Root Directory**, set **`backend`**. Then the build context is only `backend/`, and **`backend/Dockerfile`** is valid (it sits at the root of that context). **`backend/railway.json`** forces **`builder: DOCKERFILE`**. If the dashboard asks for a **config file path**, use **`/backend/railway.json`** (leading slash, repo-relative path).
+
+**Option B (repo root):** Leave **Root Directory** empty. Ensure the repo has **`Dockerfile`** + **`railway.json`** at the **repository root** (not only under `backend/`). If Railpack still runs, add a service variable **`RAILWAY_DOCKERFILE_PATH`** = **`Dockerfile`**, then redeploy. In the UI, pick **Dockerfile** as the builder if you see that option.
+
+#### Render / Fly
+
+Use **`Dockerfile`** at the **repo root** with build context **`.`**, or set the service root to **`backend`** and build from **`backend/Dockerfile`**.
+
 3. Set:
    - `DATABASE_URL` (or split `POSTGRES_*`)
    - `JWT_SECRET` (long random string)
