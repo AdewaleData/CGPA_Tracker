@@ -1,0 +1,17 @@
+# Optional: if you install Docker Desktop, run: docker compose up -d
+# Then use DATABASE_URL=postgresql://postgres:postgres@localhost:5432/cgpa_tracker in backend/.env
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cgpa_tracker
+    ports:
+      - "5432:5432"
+    volumes:
+      - cgpa_pgdata:/var/lib/postgresql/data
+
+volumes:
+  cgpa_pgdata:

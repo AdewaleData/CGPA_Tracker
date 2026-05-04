@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #fafafa;
+  --fg: #0f172a;
+  --muted: #64748b;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --sidebar: #1e1b4b;
+  --sidebar-fg: #e2e8f0;
+}
+
+.dark {
+  --bg: #0b0b0f;
+  --fg: #f1f5f9;
+  --muted: #94a3b8;
+  --card: #111118;
+  --border: #1e293b;
+  --sidebar: #0f0f14;
+  --sidebar-fg: #e2e8f0;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+}
