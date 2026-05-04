@@ -76,13 +76,21 @@ Use **`Dockerfile`** at the **repo root** with build context **`.`**, or set the
 
 ---
 
-## 5) Smoke tests after deploy
+## 5) Railway healthcheck on `/health`
+
+The API responds on **`/health`** even if **PostgreSQL is not linked yet** or **`DATABASE_URL`** is wrong (table creation is wrapped so the process still binds to `PORT`). After you attach a database, **redeploy** so `create_all` can run, or call any endpoint once the DB is up and tables will be created on first successful startup.
+
+If healthchecks still fail: confirm **`PORT`** is not overridden in a way that hides the app, and read **Deploy logs** for import errors.
+
+---
+
+## 6) Smoke tests after deploy
 
 1. `GET https://<api>/health` → `{"status":"ok"}`
 2. Open the site, **register**, then **dashboard** — if CORS or `BACKEND_URL` is wrong, login or data loads will fail in the browser Network tab.
 
 ---
 
-## 6) Migrations
+## 7) Migrations
 
 The API runs SQLAlchemy `create_all` on startup for development convenience. For strict production control, apply **`database/schema.sql`** (and any files under `database/migrations/`) against Postgres before or after first deploy, and treat model changes as migrations going forward.

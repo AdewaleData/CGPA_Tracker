@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -8,10 +9,19 @@ from app.database import Base, engine
 from app.models import Course, Semester, SemesterResult, User  # noqa: F401
 from app.routes import academic, auth
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    # Do not block app startup if Postgres is unreachable (Railway healthcheck on /health still passes).
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception:
+        logger.exception(
+            "Could not connect or create tables; check DATABASE_URL. "
+            "Health and OpenAPI still run; authenticated routes will fail until the DB is available."
+        )
     yield
 
 
