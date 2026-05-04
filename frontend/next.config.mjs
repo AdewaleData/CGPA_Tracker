@@ -2,7 +2,6 @@
 const backendOrigin = process.env.BACKEND_URL ?? "http://127.0.0.1:8000";
 
 const nextConfig = {
-  output: "standalone",
   reactStrictMode: true,
   // Browser calls same-origin `/backend-api/*`; Next proxies to FastAPI (no CORS issues in dev).
   async rewrites() {

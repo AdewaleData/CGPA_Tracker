@@ -39,7 +39,7 @@
 ```
 CGPA/
 ├── backend/                 # FastAPI (Dockerfile for production)
-├── frontend/              # Next.js 14 (Dockerfile + standalone output)
+├── frontend/              # Next.js 14 (Dockerfile: next start + full .next)
 ├── database/              # SQL schema, migrations, setup guides
 ├── scripts/               # Helper scripts (e.g. dev.ps1)
 ├── docker-compose.yml     # Optional local PostgreSQL (dev)

@@ -17,7 +17,13 @@ The browser calls **`/backend-api/*`** on the Next host; Next rewrites to **`{BA
 
 ---
 
-## 2) Docker (single host / VPS)
+## 2) Windows / OneDrive and `next build`
+
+If **`npm run build`** fails with **`EPERM: operation not permitted, symlink`** while writing **`.next/standalone`**, that is usually **Next standalone + Windows** (symlinks blocked or **OneDrive** blocking them). This repo’s **Dockerfile** builds on **Linux** and does **not** use standalone output, so **`docker compose … build`** and **Vercel** builds are unaffected. For a local production build on Windows, run the build **inside Docker**, or enable **Developer Mode** / move the project off OneDrive.
+
+---
+
+## 3) Docker (single host / VPS)
 
 From the repository root:
 
@@ -34,7 +40,7 @@ docker compose -f docker-compose.deploy.yml up --build
 
 ---
 
-## 3) Vercel (frontend) + managed API
+## 4) Vercel (frontend) + managed API
 
 ### Frontend (Vercel)
 
@@ -57,13 +63,13 @@ docker compose -f docker-compose.deploy.yml up --build
 
 ---
 
-## 4) Smoke tests after deploy
+## 5) Smoke tests after deploy
 
 1. `GET https://<api>/health` → `{"status":"ok"}`
 2. Open the site, **register**, then **dashboard** — if CORS or `BACKEND_URL` is wrong, login or data loads will fail in the browser Network tab.
 
 ---
 
-## 5) Migrations
+## 6) Migrations
 
 The API runs SQLAlchemy `create_all` on startup for development convenience. For strict production control, apply **`database/schema.sql`** (and any files under `database/migrations/`) against Postgres before or after first deploy, and treat model changes as migrations going forward.

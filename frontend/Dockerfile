@@ -1,4 +1,4 @@
-# Production web — Next.js standalone (see next.config.mjs output: "standalone")
+# Production web — full .next + node_modules (avoids Windows EPERM on standalone symlinks / OneDrive)
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
@@ -9,11 +9,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Baked into rewrites at build time (internal URL in compose; set to public API URL on Vercel)
 ARG BACKEND_URL=http://127.0.0.1:8000
 ENV BACKEND_URL=$BACKEND_URL
-
 ENV NEXT_TELEMETRY_DISABLED=1
+
 RUN npm run build
 
 FROM node:20-alpine AS runner
@@ -27,12 +26,14 @@ ENV HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 nextjs
 
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/next.config.mjs ./
 
 USER nextjs
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["./node_modules/.bin/next", "start", "-H", "0.0.0.0", "-p", "3000"]
