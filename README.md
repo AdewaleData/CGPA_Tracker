@@ -38,11 +38,13 @@
 
 ```
 CGPA/
-├── backend/           # FastAPI application (uvicorn)
-├── frontend/          # Next.js 14 frontend
-├── database/          # SQL schema, migrations, setup guides
-├── scripts/           # Helper scripts (e.g. dev.ps1)
-├── docker-compose.yml # Optional local PostgreSQL
+├── backend/                 # FastAPI (Dockerfile for production)
+├── frontend/              # Next.js 14 (Dockerfile + standalone output)
+├── database/              # SQL schema, migrations, setup guides
+├── scripts/               # Helper scripts (e.g. dev.ps1)
+├── docker-compose.yml     # Optional local PostgreSQL (dev)
+├── docker-compose.deploy.yml  # Postgres + API + web (production-style)
+├── DEPLOY.md              # Full deployment guide (Docker, Vercel, env vars)
 └── README.md
 ```
 
@@ -155,6 +157,21 @@ Routes are mounted under **`/api`** (proxied as **`/backend-api`** from the Next
 - **`POST /api/courses/sync`** — Upsert courses for a semester  
 - **`POST /api/semester/{id}/complete`** — Complete term  
 - **`GET /api/dashboard`** — Aggregated stats for the home dashboard  
+
+---
+
+## Deployment
+
+**Quick path (Docker on a server):**
+
+```bash
+export JWT_SECRET=$(openssl rand -hex 32)   # Windows: set JWT_SECRET=... 
+docker compose -f docker-compose.deploy.yml up --build
+```
+
+Then open **http://localhost:3000** (or your server’s public IP + port behind HTTPS).
+
+**Split hosting (e.g. Vercel + Render):** set **`BACKEND_URL`** on the frontend build to your API’s public origin, and set **`CORS_ORIGINS`** on the API to your frontend URL(s). Step-by-step instructions are in **[`DEPLOY.md`](./DEPLOY.md)**.
 
 ---
 

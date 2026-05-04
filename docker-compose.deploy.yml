@@ -1,0 +1,53 @@
+# Full stack on one machine or VPS: Postgres + API + Next (web proxies to api)
+#
+# Usage:
+#   export JWT_SECRET=$(openssl rand -hex 32)   # or set in .env.deploy
+#   docker compose -f docker-compose.deploy.yml up --build
+#
+# App: http://localhost:3000
+# API (direct): http://localhost:8000  |  health: http://localhost:8000/health
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cgpa_tracker
+    volumes:
+      - cgpa_pg_deploy:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/cgpa_tracker
+      JWT_SECRET: ${JWT_SECRET:-replace-with-openssl-rand-hex-32-minimum}
+      CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+    depends_on:
+      - db
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        BACKEND_URL: http://api:8000
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    depends_on:
+      - api
+
+volumes:
+  cgpa_pg_deploy:

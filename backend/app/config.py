@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24 * 7
 
+    # Comma-separated extra CORS origins (e.g. https://your-app.vercel.app). Localhost always allowed via regex in main.
+    cors_origins: str = Field(default="", validation_alias="CORS_ORIGINS")
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def database_url(self) -> str:
