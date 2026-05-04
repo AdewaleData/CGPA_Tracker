@@ -44,7 +44,9 @@ CGPA/
 ├── scripts/               # Helper scripts (e.g. dev.ps1)
 ├── docker-compose.yml     # Optional local PostgreSQL (dev)
 ├── docker-compose.deploy.yml  # Postgres + API + web (production-style)
-├── DEPLOY.md              # Full deployment guide (Docker, Vercel, env vars)
+├── Dockerfile           # API image (repo root; Railway / compose)
+├── railway.json         # Railway: force Docker build for monorepo API
+├── DEPLOY.md            # Full deployment guide (Docker, Vercel, env vars)
 └── README.md
 ```
 

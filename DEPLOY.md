@@ -53,7 +53,10 @@ docker compose -f docker-compose.deploy.yml up --build
 ### Backend (Render, Railway, Fly, etc.)
 
 1. Create a **PostgreSQL** instance and note the connection string.
-2. Deploy the **backend** from the `backend` folder (Dockerfile provided, or `pip install` + `uvicorn app.main:app --host 0.0.0.0 --port $PORT`).
+2. Deploy the **backend**:
+   - **Railway (monorepo):** connect this repo with **Root Directory** empty (repo root). **`Dockerfile`** at the repo root builds the API; **`railway.json`** sets **`builder: DOCKERFILE`** so Railpack does not try to guess the stack. (Railway was skipping `backend/Dockerfile` because child paths are not used when the service root is the repo root.) Set **`DATABASE_URL`**, **`JWT_SECRET`**, **`CORS_ORIGINS`** on the service.
+   - **Alternatively on Railway:** set **Root Directory** to **`backend`** and use Railpack/Nixpacks Python autodetect, or set **Dockerfile path** to `backend/Dockerfile` if your UI allows it.
+   - **Render / Fly:** point the service at **`Dockerfile`** in the repo root with build context **`.`**, or set root to `backend` and use `backend/Dockerfile`.
 3. Set:
    - `DATABASE_URL` (or split `POSTGRES_*`)
    - `JWT_SECRET` (long random string)
