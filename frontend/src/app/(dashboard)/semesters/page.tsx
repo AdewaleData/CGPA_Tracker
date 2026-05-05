@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 
 import { api } from "@/lib/api";
 
@@ -74,7 +74,7 @@ export default function SemestersPage() {
                         : "border border-[var(--border)] bg-[var(--card)] hover:bg-black/5 dark:hover:bg-white/5"
                   }`}
                   aria-disabled={locked}
-                  onClick={(e) => locked && e.preventDefault()}
+                  onClick={(e: MouseEvent<HTMLAnchorElement>) => locked && e.preventDefault()}
                 >
                   {locked ? "Not yet" : s.status === "active" ? "Edit courses" : "View / edit courses"}
                 </Link>
