@@ -20,6 +20,36 @@ export type MeUser = {
   cgpa_scale: number;
 };
 
+export type TranscriptCourse = {
+  course_code: string;
+  course_title: string;
+  credit_unit: number;
+  grade: string;
+  grade_point: number;
+};
+
+export type TranscriptSemester = {
+  id: number;
+  year: number;
+  semester: number;
+  position: number;
+  status: string;
+  label: string | null;
+  gpa: number | null;
+  cgpa: number | null;
+  total_credits: number;
+  courses: TranscriptCourse[];
+};
+
+export type TranscriptPayload = {
+  generated_at: string;
+  user: MeUser;
+  current_cgpa: number;
+  total_credits: number;
+  total_quality_points: number;
+  semesters: TranscriptSemester[];
+};
+
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("cgpa_token");
@@ -127,4 +157,5 @@ export const api = {
       average_semester_gpa: number;
       user: MeUser;
     }>("/dashboard"),
+  transcript: () => request<TranscriptPayload>("/transcript"),
 };

@@ -6,6 +6,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 
 import { CgpaChart } from "@/components/CgpaChart";
 import { api } from "@/lib/api";
+import { printTranscriptAsPdf } from "@/lib/transcriptPrint";
 
 type Tab = "trend" | "gpa" | "grades";
 
@@ -13,6 +14,8 @@ export default function ReportsPage() {
   const [tab, setTab] = useState<Tab>("trend");
   const [data, setData] = useState<Awaited<ReturnType<typeof api.dashboard>> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [pdfErr, setPdfErr] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,11 +74,23 @@ export default function ReportsPage() {
         </div>
         <button
           type="button"
-          disabled
-          className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-sm font-semibold text-[var(--muted)] shadow-sm"
-          title="PDF export is on the way"
+          disabled={pdfBusy}
+          onClick={async () => {
+            setPdfErr(null);
+            setPdfBusy(true);
+            try {
+              const t = await api.transcript();
+              printTranscriptAsPdf(t);
+            } catch (e) {
+              setPdfErr(e instanceof Error ? e.message : "Could not load transcript");
+            } finally {
+              setPdfBusy(false);
+            }
+          }}
+          className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-sm font-semibold text-[var(--fg)] shadow-sm hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-60"
+          title="Opens a print view — choose “Save as PDF” as the printer to download a file"
         >
-          Download PDF (soon)
+          {pdfBusy ? "Preparing…" : "Save results as PDF"}
         </button>
       </div>
 
@@ -97,6 +112,7 @@ export default function ReportsPage() {
       </div>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {pdfErr ? <p className="text-sm text-red-600">{pdfErr}</p> : null}
       {!data && !error ? <p className="text-sm text-[var(--muted)]">Pulling your latest stats…</p> : null}
 
       {data && tab === "trend" ? (

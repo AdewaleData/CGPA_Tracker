@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -93,8 +95,11 @@ def sync_courses(body: CoursesSyncBody, db: Session = Depends(get_db), user: Use
     s = _semester_for_user(db, body.semester_id, user)
     if not s:
         raise HTTPException(status_code=404, detail="Semester not found")
-    if s.status != "active":
-        raise HTTPException(status_code=400, detail="Only the active semester can be edited")
+    if s.status == "upcoming":
+        raise HTTPException(
+            status_code=400,
+            detail="This term is still locked. Finish earlier terms before editing courses here.",
+        )
 
     db.query(Course).filter(Course.semester_id == s.id).delete()
     for row in body.courses:
@@ -133,8 +138,6 @@ def complete_semester(semester_id: int, db: Session = Depends(get_db), user: Use
         raise HTTPException(status_code=400, detail="Add at least one course before completing")
 
     s.status = "completed"
-    from datetime import datetime, timezone
-
     s.completed_at = datetime.now(timezone.utc)
 
     nxt = (
@@ -147,6 +150,67 @@ def complete_semester(semester_id: int, db: Session = Depends(get_db), user: Use
 
     db.commit()
     return {"ok": True}
+
+
+@router.get("/transcript")
+def transcript(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """Full semester + course list for exports (e.g. PDF)."""
+    sems = (
+        db.query(Semester)
+        .filter(Semester.user_id == user.id)
+        .order_by(Semester.position)
+        .all()
+    )
+    all_courses: list[tuple[Course, Semester]] = []
+    for s in sems:
+        for c in s.courses:
+            all_courses.append((c, s))
+    total_credits = sum(float(c.credit_unit) for c, _ in all_courses)
+    total_qp = sum(float(c.credit_unit) * float(c.grade_point) for c, _ in all_courses)
+    current_cgpa = round(total_qp / total_credits, 4) if total_credits > 0 else 0.0
+
+    out_sems = []
+    for s in sems:
+        courses = courses_for_semester(db, s.id, user.id)
+        gpa = float(s.result.gpa) if s.result else None
+        cgpa = float(s.result.cgpa) if s.result else None
+        out_sems.append(
+            {
+                "id": s.id,
+                "year": s.year,
+                "semester": s.semester,
+                "position": s.position,
+                "status": s.status,
+                "label": s.label,
+                "gpa": gpa,
+                "cgpa": cgpa,
+                "total_credits": _semester_credits_total(db, s.id),
+                "courses": [
+                    {
+                        "course_code": c.course_code,
+                        "course_title": c.course_title,
+                        "credit_unit": float(c.credit_unit),
+                        "grade": c.grade,
+                        "grade_point": float(c.grade_point),
+                    }
+                    for c in courses
+                ],
+            }
+        )
+
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "user": {
+            "name": user.name,
+            "email": user.email,
+            "course_duration": user.course_duration,
+            "cgpa_scale": float(user.cgpa_scale),
+        },
+        "current_cgpa": current_cgpa,
+        "total_credits": total_credits,
+        "total_quality_points": round(total_qp, 4),
+        "semesters": out_sems,
+    }
 
 
 @router.get("/dashboard")

@@ -76,7 +76,7 @@ export default function SemestersPage() {
                   aria-disabled={locked}
                   onClick={(e) => locked && e.preventDefault()}
                 >
-                  {locked ? "Not yet" : s.status === "active" ? "Edit courses" : "View details"}
+                  {locked ? "Not yet" : s.status === "active" ? "Edit courses" : "View / edit courses"}
                 </Link>
               </div>
             </li>

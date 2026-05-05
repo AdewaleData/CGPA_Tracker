@@ -6,11 +6,9 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
-import { letterGradePoints } from "@/lib/grades";
+import { LETTER_GRADES, letterGradePoints, normalizeLetterGrade } from "@/lib/grades";
 
 type Row = { course_code: string; course_title: string; credit_unit: string; grade: string };
-
-const GRADES = ["A", "B", "C", "D", "F"] as const;
 
 function emptyRow(): Row {
   return { course_code: "", course_title: "", credit_unit: "3", grade: "A" };
@@ -26,7 +24,7 @@ export default function SemesterCoursesPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const readonly = detail != null && detail.status !== "active";
+  const locked = detail != null && detail.status === "upcoming";
 
   useEffect(() => {
     let cancelled = false;
@@ -41,11 +39,11 @@ export default function SemesterCoursesPage() {
               course_code: c.course_code,
               course_title: c.course_title,
               credit_unit: String(c.credit_unit),
-              grade: c.grade,
+              grade: normalizeLetterGrade(c.grade),
             })),
           );
         } else {
-          setRows(d.status === "active" ? [emptyRow()] : []);
+          setRows(d.status === "active" || d.status === "completed" ? [emptyRow()] : []);
         }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load semester");
@@ -72,7 +70,7 @@ export default function SemesterCoursesPage() {
   }, [rows, user?.cgpa_scale]);
 
   async function save() {
-    if (!detail || detail.status !== "active") return;
+    if (!detail || detail.status === "upcoming") return;
     setBusy(true);
     setError(null);
     try {
@@ -82,7 +80,7 @@ export default function SemesterCoursesPage() {
           course_code: r.course_code.trim(),
           course_title: r.course_title.trim() || r.course_code.trim(),
           credit_unit: parseFloat(r.credit_unit),
-          grade: r.grade,
+          grade: normalizeLetterGrade(r.grade),
         }));
       await api.syncCourses({ semester_id: detail.id, courses });
       const d = await api.semester(id);
@@ -124,13 +122,13 @@ export default function SemesterCoursesPage() {
             {detail.status === "active"
               ? "You can edit courses below. Save whenever you make changes."
               : detail.status === "completed"
-                ? "This term is closed—courses are read-only."
+                ? "This term is finished, but you can still correct mistakes—edit below and click Save. GPAs and CGPA will update."
                 : "This term is still locked until earlier terms are finished."}
             {detail.gpa != null ? ` Saved GPA: ${detail.gpa.toFixed(2)}.` : ""}
             {detail.cgpa != null ? ` CGPA after this term: ${detail.cgpa.toFixed(2)}.` : ""}
           </p>
         </div>
-        {detail.status === "active" ? (
+        {detail.status === "active" || detail.status === "completed" ? (
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -140,14 +138,16 @@ export default function SemesterCoursesPage() {
             >
               Save changes
             </button>
-            <button
-              type="button"
-              onClick={complete}
-              disabled={busy || totals.credits <= 0}
-              className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-semibold hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-60"
-            >
-              Mark this term complete
-            </button>
+            {detail.status === "active" ? (
+              <button
+                type="button"
+                onClick={complete}
+                disabled={busy || totals.credits <= 0}
+                className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-semibold hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-60"
+              >
+                Mark this term complete
+              </button>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -162,7 +162,7 @@ export default function SemesterCoursesPage() {
               <th className="px-3 py-2">Title</th>
               <th className="px-3 py-2">Credits</th>
               <th className="px-3 py-2">Grade</th>
-              {!readonly ? <th className="px-3 py-2" /> : null}
+              {!locked ? <th className="px-3 py-2" /> : null}
             </tr>
           </thead>
           <tbody>
@@ -170,7 +170,7 @@ export default function SemesterCoursesPage() {
               <tr key={idx} className="border-b border-[var(--border)] last:border-0">
                 <td className="px-3 py-2">
                   <input
-                    disabled={readonly}
+                    disabled={locked}
                     className="w-full rounded border border-transparent bg-transparent px-2 py-1 outline-none focus:border-brand-500 disabled:opacity-70"
                     value={r.course_code}
                     onChange={(e) => {
@@ -182,7 +182,7 @@ export default function SemesterCoursesPage() {
                 </td>
                 <td className="px-3 py-2">
                   <input
-                    disabled={readonly}
+                    disabled={locked}
                     className="w-full min-w-[10rem] rounded border border-transparent bg-transparent px-2 py-1 outline-none focus:border-brand-500 disabled:opacity-70"
                     value={r.course_title}
                     onChange={(e) => {
@@ -194,7 +194,7 @@ export default function SemesterCoursesPage() {
                 </td>
                 <td className="px-3 py-2">
                   <input
-                    disabled={readonly}
+                    disabled={locked}
                     type="number"
                     min={0}
                     step={0.5}
@@ -209,7 +209,7 @@ export default function SemesterCoursesPage() {
                 </td>
                 <td className="px-3 py-2">
                   <select
-                    disabled={readonly}
+                    disabled={locked}
                     className="rounded border border-[var(--border)] bg-transparent px-2 py-1 disabled:opacity-70"
                     value={r.grade}
                     onChange={(e) => {
@@ -218,14 +218,14 @@ export default function SemesterCoursesPage() {
                       setRows(next);
                     }}
                   >
-                    {GRADES.map((g) => (
+                    {LETTER_GRADES.map((g) => (
                       <option key={g} value={g}>
                         {g}
                       </option>
                     ))}
                   </select>
                 </td>
-                {!readonly ? (
+                {!locked ? (
                   <td className="px-3 py-2 text-right">
                     <button
                       type="button"
@@ -242,7 +242,7 @@ export default function SemesterCoursesPage() {
         </table>
       </div>
 
-      {!readonly ? (
+      {!locked ? (
         <button
           type="button"
           className="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400"
