@@ -73,21 +73,21 @@ export default function SettingsPage() {
           <legend className="text-sm font-medium text-[var(--fg)]">Grading cap</legend>
           <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
             Pick <strong className="text-[var(--fg)]">4.00</strong> or <strong className="text-[var(--fg)]">5.00</strong> to
-            match your transcript. Letter grades map to points on that cap (A at the top, F at zero).
+            match your transcript. Letters A–E map to points below the cap; F is zero.
           </p>
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
             <label className="flex flex-1 cursor-pointer items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3 has-[:checked]:border-brand-600 has-[:checked]:ring-1 has-[:checked]:ring-brand-600">
               <input type="radio" name="scale" checked={cgpaScale === 4} onChange={() => setCgpaScale(4)} />
               <div>
                 <p className="font-semibold text-[var(--fg)]">4.00 scale</p>
-                <p className="text-xs text-[var(--muted)]">A=4, B=3, C=2, D=1, F=0</p>
+                <p className="text-xs text-[var(--muted)]">A=4, B=3, C=2, D=1, E=0.5, F=0</p>
               </div>
             </label>
             <label className="flex flex-1 cursor-pointer items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3 has-[:checked]:border-brand-600 has-[:checked]:ring-1 has-[:checked]:ring-brand-600">
               <input type="radio" name="scale" checked={cgpaScale === 5} onChange={() => setCgpaScale(5)} />
               <div>
                 <p className="font-semibold text-[var(--fg)]">5.00 scale</p>
-                <p className="text-xs text-[var(--muted)]">A=5, B=4, C=3, D=2, F=0</p>
+                <p className="text-xs text-[var(--muted)]">A=5, B=4, C=3, D=2, E=1, F=0</p>
               </div>
             </label>
           </div>

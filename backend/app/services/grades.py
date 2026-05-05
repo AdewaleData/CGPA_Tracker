@@ -2,8 +2,8 @@ from __future__ import annotations
 
 # Letter maps for common scales (max grade point = scale).
 _SCALE_MAPS: dict[float, dict[str, float]] = {
-    4.0: {"A": 4.0, "B": 3.0, "C": 2.0, "D": 1.0, "F": 0.0},
-    5.0: {"A": 5.0, "B": 4.0, "C": 3.0, "D": 2.0, "F": 0.0},
+    4.0: {"A": 4.0, "B": 3.0, "C": 2.0, "D": 1.0, "E": 0.5, "F": 0.0},
+    5.0: {"A": 5.0, "B": 4.0, "C": 3.0, "D": 2.0, "E": 1.0, "F": 0.0},
 }
 
 
